@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>A&P Course Overview Dashboard</title>
+  <style>
+    :root{
+      --bg:#0b1220; --card:#111b2f; --muted:#9fb0d0; --text:#e8efff;
+      --accent:#6ae4ff; --accent2:#a78bfa; --ok:#34d399; --warn:#fbbf24;
+      --bad:#fb7185; --border:rgba(255,255,255,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 20% 0%, rgba(106,228,255,.10), transparent 50%),
+                  radial-gradient(900px 700px at 100% 20%, rgba(167,139,250,.10), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    header{
+      padding:22px 18px 10px;
+      border-bottom:1px solid var(--border);
+      backdrop-filter:saturate(1.2) blur(6px);
+      position:sticky; top:0; background:rgba(11,18,32,.75);
+      z-index:10;
+    }
+    .wrap{max-width:1100px; margin:0 auto}
+    .top{
+      display:flex; gap:14px; align-items:flex-start; justify-content:space-between; flex-wrap:wrap;
+    }
+    h1{font-size:20px; margin:0 0 6px; letter-spacing:.2px}
+    .sub{color:var(--muted); font-size:13px; margin:0}
+    .controls{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;
+    }
+    input[type="search"], select{
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px 12px;
+      outline:none;
+      min-width:220px;
+    }
+    select{min-width:180px}
+    main{padding:18px}
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:14px;
+    }
+    @media (max-width: 900px){
+      .grid{grid-template-columns:1fr}
+      input[type="search"]{min-width:0; width:100%}
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+    .card h2{font-size:14px; margin:0 0 10px; color:#dbe7ff}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      border:1px solid var(--border);
+      padding:6px 10px;
+      border-radius:999px;
+      color:var(--muted);
+      font-size:12px;
+      background:rgba(0,0,0,.10);
+    }
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .kpi{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+    }
+    @media (max-width: 520px){ .kpi{grid-template-columns:1fr} }
+    .kpi .stat{
+      padding:12px; border-radius:14px; border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+    }
+    .big{font-size:22px; font-weight:700; margin:0 0 4px}
+    .label{font-size:12px; color:var(--muted); margin:0}
+    .progress{
+      height:10px; border-radius:999px; overflow:hidden;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--border);
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+    .list{display:flex; flex-direction:column; gap:10px}
+    .item{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px 12px;
+      background:rgba(255,255,255,.03);
+    }
+    .item-top{
+      display:flex; justify-content:space-between; gap:10px; align-items:flex-start; flex-wrap:wrap;
+    }
+    .title{font-weight:650; margin:0; font-size:13px}
+    .meta{margin:6px 0 0; color:var(--muted); font-size:12px; line-height:1.35}
+    .tags{display:flex; gap:6px; flex-wrap:wrap}
+    .tag{
+      font-size:11px; padding:4px 8px; border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(0,0,0,.14);
+      color:var(--muted);
+    }
+    .tag.level{color:#e9d5ff; border-color:rgba(167,139,250,.25)}
+    .tag.week{color:#cffafe; border-color:rgba(106,228,255,.25)}
+    .actions{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+    button{
+      cursor:pointer;
+      border:1px solid var(--border);
+      color:var(--text);
+      background:rgba(255,255,255,.04);
+      border-radius:10px;
+      padding:8px 10px;
+      font-size:12px;
+    }
+    button.primary{
+      background: linear-gradient(90deg, rgba(106,228,255,.18), rgba(167,139,250,.18));
+      border-color: rgba(106,228,255,.25);
+    }
+    .check{
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    .check input{margin-top:3px; accent-color: var(--ok);}
+    .note{
+      width:100%; margin-top:8px;
+      background:rgba(0,0,0,.12);
+      color:var(--text);
+      border:1px dashed rgba(255,255,255,.14);
+      border-radius:12px;
+      padding:8px 10px;
+      font-size:12px;
+      display:none;
+    }
+    .note.show{display:block}
+    footer{padding:14px 18px 26px; color:var(--muted); font-size:12px}
+    a{color:var(--accent)}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1 id="courseTitle">Course Overview</h1>
+        <p class="sub" id="courseSub">Learning objectives • Modules • Progress</p>
+        <div class="row" style="margin-top:10px">
+          <span class="pill" id="termPill">Term: —</span>
+          <span class="pill" id="creditsPill">Credits: —</span>
+          <span class="pill" id="instructorPill">Instructor: —</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <input id="search" type="search" placeholder="Search objectives/modules…" />
+        <select id="filterLevel">
+          <option value="all">All difficulty</option>
+          <option value="Intro">Intro</option>
+          <option value="Core">Core</option>
+          <option value="Advanced">Advanced</option>
+        </select>
+        <select id="filterWeek">
+          <option value="all">All weeks</option>
+        </select>
+        <button id="reset" class="primary">Reset</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="grid">
+    <section class="card">
+      <h2>Learning objectives</h2>
+      <div class="kpi" style="margin-bottom:12px">
+        <div class="stat">
+          <p class="big" id="objDone">0</p>
+          <p class="label">Completed objectives</p>
+        </div>
+        <div class="stat">
+          <p class="big" id="objTotal">0</p>
+          <p class="label">Total objectives</p>
+        </div>
+        <div class="stat">
+          <p class="big" id="objPct">0%</p>
+          <p class="label">Completion</p>
+        </div>
+      </div>
+
+      <div class="progress" aria-label="Objectives progress">
+        <div class="bar" id="objBar"></div>
+      </div>
+
+      <div class="list" id="objectivesList" style="margin-top:12px"></div>
+    </section>
+
+    <aside class="card">
+      <h2>Modules & plan</h2>
+      <div class="kpi" style="margin-bottom:12px">
+        <div class="stat">
+          <p class="big" id="modCount">0</p>
+          <p class="label">Modules</p>
+        </div>
+        <div class="stat">
+          <p class="big" id="weekCount">0</p>
+          <p class="label">Weeks covered</p>
+        </div>
+        <div class="stat">
+          <p class="big" id="estHours">0</p>
+          <p class="label">Estimated hours</p>
+        </div>
+      </div>
+
+      <div class="list" id="modulesList"></div>
+
+      <div style="margin-top:12px">
+        <h2 style="margin-top:0">Quick tips</h2>
+        <ul style="margin:0; padding-left:18px; color:var(--muted); font-size:12px; line-height:1.5">
+          <li>Use the search box to find a topic fast.</li>
+          <li>Check off objectives as you learn them—progress is saved in your browser.</li>
+          <li>Add notes under any objective/module for active recall.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="wrap">
+  Saved locally in your browser (no account needed). To clear progress, use <strong>Reset</strong>.
+</footer>
+
+<script>
+/* =========================
+   DATA (edit this section)
+   ========================= */
+const DATA = {
+  course: {
+    title: "Essential of Anatomy and Physiology",
+    term: "Fall 2026",
+    credits: "4",
+    instructor: "Brandi Reed",
+    subtitle: "BIOL 1314 (CRN 11072) • MW 8:00–9:20am + Mon lab 9:30am–12:20pm • MCAC-625/626"
+  },
+  objectives: [
+    { id: "obj-1", text: "Evaluate human physiology as it relates to body systems.", level: "Core", week: 1 },
+    { id: "obj-2", text: "Evaluate the role of feedback loops to control physiological changes within the body.", level: "Core", week: 1 },
+    { id: "obj-3", text: "Analyze diseases and disorders in the context of homeostatic imbalances.", level: "Advanced", week: 2 },
+    { id: "obj-4", text: "Define anatomical terminology.", level: "Intro", week: 1 },
+    { id: "obj-5", text: "Identify anatomical structure through dissection.", level: "Core", week: 3 },
+    { id: "obj-6", text: "Utilize proper laboratory technique.", level: "Intro", week: 1 }
+  ],
+  modules: [
+    { id: "mod-1", title: "Week 1 — Ch. 1–2 Foundations & chemistry", week: 1, level: "Intro", estHours: 6, topics: ["Chapter 1: The Human Body", "Chapter 2: Basic Chemistry", "Lab 1: Intro to Anatomy", "Lab Safety Agreement", "Quiz 1", "Guided Notes 1–2"] },
+    { id: "mod-2", title: "Week 2 — Ch. 3 Cells & tissues", week: 2, level: "Core", estHours: 6, topics: ["Chapter 3: Cells", "Chapter 3: Tissues", "Lab 2: Cell & Membrane Transport", "Lab 1 due", "Quiz 2", "Guided Notes 3"] },
+    { id: "mod-3", title: "Week 3 — Ch. 4 Skin & membranes", week: 3, level: "Core", estHours: 6, topics: ["Chapter 4: Skin & Membranes", "Lab 3: Microscope & Histology", "Lab 2 due", "Quiz 3", "Guided Notes 4"] },
+    { id: "mod-4", title: "Week 4 — Exam 1 (Ch. 1–4)", week: 4, level: "Core", estHours: 5, topics: ["Exam 1 Review", "Exam 1 (Ch. 1–4)", "Quiz 4"] },
+    { id: "mod-5", title: "Week 5 — Ch. 5 Skeletal", week: 5, level: "Core", estHours: 6, topics: ["Chapter 5: Skeletal", "Lab 4: Axial Skeleton", "Lab 3 due", "Quiz 5", "Guided Notes 5"] },
+    { id: "mod-6", title: "Week 6 — Ch. 6 Muscular", week: 6, level: "Core", estHours: 6, topics: ["Chapter 6: Muscular", "Lab 5: Appendicular Skeleton", "Lab 4 due", "Quiz 6", "Guided Notes 6"] },
+    { id: "mod-7", title: "Week 7 — Ch. 7 Nervous", week: 7, level: "Core", estHours: 6, topics: ["Chapter 7: Nervous", "Lab 6: Muscular Lab", "Lab 5 due", "Quiz 7", "Guided Notes 7"] },
+    { id: "mod-8", title: "Week 8 — Ch. 8 Special senses", week: 8, level: "Core", estHours: 6, topics: ["Chapter 8: Special Senses", "Lab 7: Brain & Spinal Cord", "Lab 6 due", "Quiz 8", "Guided Notes 8"] },
+    { id: "mod-9", title: "Week 9 — Exam 2 (Ch. 5–8) + Ch. 10 Blood", week: 9, level: "Core", estHours: 7, topics: ["Exam 2 Review", "Exam 2 (Ch. 5–8)", "Chapter 10: Blood", "Lab 8: Special Senses", "Lab 7 due", "Quiz 9", "Guided Notes 10"] },
+    { id: "mod-10", title: "Week 10 — Ch. 11 Cardiovascular + Ch. 13 Respiratory", week: 10, level: "Core", estHours: 7, topics: ["Chapter 11: Cardiovascular", "Chapter 13: Respiratory", "Lab 9: Blood Lab", "Lab 8 due", "Quiz 10", "Guided Notes 11 & 13"] },
+    { id: "mod-11", title: "Week 11 — Ch. 14 Digestive", week: 11, level: "Core", estHours: 6, topics: ["Chapter 14: Digestive", "Lab 10: Cardiac Lab", "Lab 9 due", "Quiz 11", "Guided Notes 14", "Exam 3 Review"] },
+    { id: "mod-12", title: "Week 12 — Exam 3 (Ch. 10,11,13,14) + Ch. 15 Urinary", week: 12, level: "Core", estHours: 7, topics: ["Chapter 15: Urinary", "Lab 11: Respiratory Lab", "Exam 3 (Ch. 10,11,13,14)", "Lab 10 due", "Quiz 12", "Guided Notes 15"] },
+    { id: "mod-13", title: "Week 13 — Ch. 9 Endocrine (Final project check-in)", week: 13, level: "Advanced", estHours: 6, topics: ["Chapter 9: Endocrine", "Lab 12: Digestive Lab", "Lab 11 due", "Quiz 13", "Final Project check-in", "Guided Notes 9"] },
+    { id: "mod-14", title: "Week 14 — Ch. 16 Reproductive + Ch. 12 Lymphatic", week: 14, level: "Advanced", estHours: 7, topics: ["Chapter 16: Reproductive", "Chapter 12: Lymphatic", "Lab 13: Urinary Lab", "Lab 12 due", "Quiz 14", "Guided Notes 16 & 12"] },
+    { id: "mod-15", title: "Week 15 — Exam 4 review (no lab)", week: 15, level: "Core", estHours: 4, topics: ["Exam 4 Review", "No Lab", "No Class (Nov 25)"] },
+    { id: "mod-16", title: "Week 16 — Exam 4 (Ch. 15,9,12,16) + final projects", week: 16, level: "Core", estHours: 7, topics: ["Final Exam Review", "Exam 4 (Ch. 15,9,12,16)", "Lab 14: Reproductive Lab", "Lab 13 due", "Quiz 15", "Final Projects due (Dec 2)"] },
+    { id: "mod-17", title: "Finals week — Optional cumulative final", week: 17, level: "Core", estHours: 3, topics: ["Final Exam (8am, Dec 7)", "No Lab", "No Class (Dec 9)"] }
+  ]
+};
+
+/* =========================
+   APP
+   ========================= */
+const els = {
+  courseTitle: document.getElementById("courseTitle"),
+  courseSub: document.getElementById("courseSub"),
+  termPill: document.getElementById("termPill"),
+  creditsPill: document.getElementById("creditsPill"),
+  instructorPill: document.getElementById("instructorPill"),
+
+  search: document.getElementById("search"),
+  filterLevel: document.getElementById("filterLevel"),
+  filterWeek: document.getElementById("filterWeek"),
+  reset: document.getElementById("reset"),
+
+  objDone: document.getElementById("objDone"),
+  objTotal: document.getElementById("objTotal"),
+  objPct: document.getElementById("objPct"),
+  objBar: document.getElementById("objBar"),
+
+  objectivesList: document.getElementById("objectivesList"),
+  modulesList: document.getElementById("modulesList"),
+
+  modCount: document.getElementById("modCount"),
+  weekCount: document.getElementById("weekCount"),
+  estHours: document.getElementById("estHours"),
+};
+
+const storageKey = "ap_dashboard_state_v1";
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(storageKey);
+    if(!raw) return { checked: {}, notes: {} };
+    return JSON.parse(raw);
+  }catch(e){
+    return { checked: {}, notes: {} };
+  }
+}
+
+function saveState(state){
+  localStorage.setItem(storageKey, JSON.stringify(state));
+}
+
+function uniq(arr){ return Array.from(new Set(arr)); }
+
+function setHeader(){
+  els.courseTitle.textContent = DATA.course.title || "Course Overview";
+  els.courseSub.textContent = DATA.course.subtitle || "";
+  els.termPill.textContent = "Term: " + (DATA.course.term || "—");
+  els.creditsPill.textContent = "Credits: " + (DATA.course.credits || "—");
+  els.instructorPill.textContent = "Instructor: " + (DATA.course.instructor || "—");
+}
+
+function buildWeekFilter(){
+  const weeks = uniq([
+    ...DATA.objectives.map(o => o.week),
+    ...DATA.modules.map(m => m.week)
+  ].filter(Boolean)).sort((a,b)=>a-b);
+
+  // reset options (keep "all")
+  els.filterWeek.innerHTML = '<option value="all">All weeks</option>' +
+    weeks.map(w => `<option value="${w}">Week ${w}</option>`).join("");
+}
+
+function matchesFilters(item){
+  const q = (els.search.value || "").trim().toLowerCase();
+  const level = els.filterLevel.value;
+  const week = els.filterWeek.value;
+
+  const text = JSON.stringify(item).toLowerCase();
+  const okQ = !q || text.includes(q);
+  const okL = (level === "all") || (item.level === level);
+  const okW = (week === "all") || (String(item.week) === week);
+
+  return okQ && okL && okW;
+}
+
+function renderObjectives(){
+  const state = loadState();
+  const filtered = DATA.objectives.filter(matchesFilters);
+
+  els.objectivesList.innerHTML = "";
+
+  filtered.forEach(obj => {
+    const checked = !!state.checked[obj.id];
+    const noteText = state.notes[obj.id] || "";
+
+    const div = document.createElement("div");
+    div.className = "item";
+
+    div.innerHTML = `
+      <div class="item-top">
+        <div class="check">
+          <input type="checkbox" ${checked ? "checked" : ""} data-id="${obj.id}" />
+          <div>
+            <p class="title">${obj.text}</p>
+            <div class="tags">
+              <span class="tag level">${obj.level}</span>
+              <span class="tag week">Week ${obj.week}</span>
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <button data-action="toggle-note" data-id="${obj.id}">Notes</button>
+        </div>
+      </div>
+      <textarea class="note ${noteText ? "show" : ""}" rows="3" placeholder="Add a short note / memory hook…" data-note="${obj.id}">${noteText.replaceAll("<","&lt;")}</textarea>
+    `;
+
+    els.objectivesList.appendChild(div);
+  });
+
+  // KPI (computed from full objectives, not filtered)
+  const total = DATA.objectives.length;
+  const done = DATA.objectives.filter(o => !!state.checked[o.id]).length;
+  const pct = total ? Math.round((done/total)*100) : 0;
+
+  els.objDone.textContent = done;
+  els.objTotal.textContent = total;
+  els.objPct.textContent = pct + "%";
+  els.objBar.style.width = pct + "%";
+}
+
+function renderModules(){
+  const filtered = DATA.modules.filter(matchesFilters);
+
+  els.modulesList.innerHTML = "";
+  filtered.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `
+      <div class="item-top">
+        <div>
+          <p class="title">${m.title}</p>
+          <p class="meta">${m.topics.join(" • ")}</p>
+          <div class="tags">
+            <span class="tag level">${m.level}</span>
+            <span class="tag week">Week ${m.week}</span>
+            <span class="tag">~${m.estHours}h</span>
+          </div>
+        </div>
+        <div class="actions">
+          <button data-action="copy-topics" data-id="${m.id}">Copy topics</button>
+        </div>
+      </div>
+    `;
+    els.modulesList.appendChild(div);
+  });
+
+  const modCount = DATA.modules.length;
+  const weekCount = uniq(DATA.modules.map(m => m.week)).length;
+  const estHours = DATA.modules.reduce((s,m)=>s+(m.estHours||0),0);
+
+  els.modCount.textContent = modCount;
+  els.weekCount.textContent = weekCount;
+  els.estHours.textContent = estHours;
+}
+
+function wireEvents(){
+  ["input","change"].forEach(evt => {
+    els.search.addEventListener(evt, () => { renderObjectives(); renderModules(); });
+    els.filterLevel.addEventListener(evt, () => { renderObjectives(); renderModules(); });
+    els.filterWeek.addEventListener(evt, () => { renderObjectives(); renderModules(); });
+  });
+
+  document.body.addEventListener("change", (e) => {
+    const t = e.target;
+    if(t && t.matches('input[type="checkbox"][data-id]')){
+      const id = t.getAttribute("data-id");
+      const state = loadState();
+      state.checked[id] = t.checked;
+      saveState(state);
+      renderObjectives();
+    }
+  });
+
+  document.body.addEventListener("click", async (e) => {
+    const t = e.target;
+    if(!t || !t.matches("button[data-action]")) return;
+    const action = t.getAttribute("data-action");
+    const id = t.getAttribute("data-id");
+
+    if(action === "toggle-note"){
+      const ta = document.querySelector(`textarea[data-note="${id}"]`);
+      if(ta) ta.classList.toggle("show");
+      return;
+    }
+
+    if(action === "copy-topics"){
+      const mod = DATA.modules.find(m => m.id === id);
+      if(!mod) return;
+      const txt = mod.topics.join(", ");
+      try{
+        await navigator.clipboard.writeText(txt);
+        t.textContent = "Copied";
+        setTimeout(()=>t.textContent="Copy topics", 900);
+      }catch(err){
+        alert("Copy failed. Topics: " + txt);
+      }
+      return;
+    }
+  });
+
+  document.body.addEventListener("input", (e) => {
+    const t = e.target;
+    if(t && t.matches("textarea[data-note]")){
+      const id = t.getAttribute("data-note");
+      const state = loadState();
+      state.notes[id] = t.value;
+      saveState(state);
+    }
+  });
+
+  els.reset.addEventListener("click", () => {
+    localStorage.removeItem(storageKey);
+    els.search.value = "";
+    els.filterLevel.value = "all";
+    els.filterWeek.value = "all";
+    renderObjectives();
+    renderModules();
+  });
+}
+
+function init(){
+  setHeader();
+  buildWeekFilter();
+  wireEvents();
+  renderObjectives();
+  renderModules();
+}
+init();
+</script>
+</body>
+</html>
